@@ -1,5 +1,5 @@
-import { IMigrate } from './migrate/migrate-interfaces';
 import { TableConstraint, CreateColumnDef, NodeLocation, DataTypeDef, FunctionArgumentMode, BinaryOperator, Statement } from 'pgsql-ast-parser';
+import { MigrationParams } from './migrate/migrate-interfaces';
 
 
 export type nil = undefined | null;
@@ -219,6 +219,9 @@ export interface LibAdapters {
     /** Create a Knex.js instance bound to this db */
     createKnex(queryLatency?: number, knexConfig?: object): any;
 
+    /** Create a Kysely instance bound to this db */
+    createKysely(queryLatency?: number, kyselyConfig?: object): any;
+
     /** Create a mikro-orm instance bound to this db */
     createMikroOrm(mikroOrmOptions: any, queryLatency?: number): Promise<any>
 }
@@ -288,7 +291,7 @@ export interface ISchema {
      * Database migration, node-sqlite flavor
      * ⚠ Only working when runnin nodejs !
      */
-    migrate(config?: IMigrate.MigrationParams): Promise<void>;
+    migrate(config?: MigrationParams): Promise<void>;
 
 
     /**

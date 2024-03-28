@@ -1,4 +1,4 @@
-import { LibAdapters, IMemoryDb, NotSupported, QueryResult, DataType } from '../interfaces';
+import { LibAdapters, IMemoryDb, NotSupported, QueryResult } from '../interfaces';
 import lru from 'lru-cache';
 import { compareVersions } from '../utils';
 import { toLiteral } from '../misc/pg-utils';
@@ -324,6 +324,16 @@ export class Adapters implements LibAdapters {
         return knex;
     }
 
+    createKysely(queryLatency?: number, kyselyConfig?: object): any {
+        const { Kysely, PostgresDialect } = __non_webpack_require__('kysely');
+        const pg = this.createPg(queryLatency);
+        return new Kysely({
+            ...kyselyConfig,
+            dialect: new PostgresDialect({
+                pool: new pg.Pool(),
+            }),
+        });
+    }
 
     async createMikroOrm(mikroOrmOptions: any, queryLatency?: number) {
 
@@ -344,18 +354,6 @@ export class Adapters implements LibAdapters {
                 super(config, new PostgreSqlPlatform(), PgMemConnection, ['knex', 'pg']);
             }
         }
-
-        // hack: this query is not supported by pgsql-ast-parser
-        if (!this._mikroPatched) {
-            this.db.public.interceptQueries(q => {
-                if (q === `set names 'utf8';`) {
-                    return [];
-                }
-                return null;
-            });
-            this._mikroPatched = true;
-        }
-
 
         const orm = await MikroORM.init({
             ...mikroOrmOptions,
